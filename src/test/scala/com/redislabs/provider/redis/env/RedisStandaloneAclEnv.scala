@@ -16,7 +16,7 @@ trait RedisStandaloneAclEnv extends Env {
     .set("spark.redis.auth", userPassword)
     .set("spark.streaming.stopGracefullyOnShutdown", "true")
     .set("spark.driver.bindAddress", "127.0.0.1")
-
+    .set("spark.driver.host", "127.0.0.1")
   override val redisConfig: RedisConfig =
     new RedisConfig(RedisEndpoint(
       host = redisHost,

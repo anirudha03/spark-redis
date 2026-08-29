@@ -2,14 +2,14 @@ package com.redislabs.provider.redis.rdd
 
 import com.redislabs.provider.redis.util.ConnectionUtils.withConnection
 import com.redislabs.provider.redis.{RedisConfig, SparkRedisSuite, toRedisContext}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import scala.collection.JavaConverters._
 
 import scala.io.Source.fromInputStream
 
 /**
-  * @author The Viet Nguyen
-  */
+ * @author The Viet Nguyen
+ */
 trait RedisRddSuite extends SparkRedisSuite with Keys with Matchers {
 
   implicit val redisConfig: RedisConfig

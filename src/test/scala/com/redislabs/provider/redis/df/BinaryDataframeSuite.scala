@@ -9,11 +9,11 @@ import org.apache.spark.SparkException
 import org.apache.spark.sql.redis.RedisSourceRelation.tableDataKeyPattern
 import org.apache.spark.sql.redis._
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 /**
-  * @author The Viet Nguyen
-  */
+ * @author The Viet Nguyen
+ */
 trait BinaryDataframeSuite extends RedisDataframeSuite with Matchers {
 
   test("save and load dataframe with binary mode") {

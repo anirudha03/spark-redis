@@ -2,7 +2,7 @@ package com.redislabs.provider.redis.df
 
 import com.redislabs.provider.redis.util.Person.generatePersonTableName
 import org.apache.spark.sql.redis.{RedisFormat, SqlOptionTableName}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 /**
   * @author The Viet Nguyen

@@ -12,7 +12,7 @@ import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.redis.RedisSourceRelation.tableDataKeyPattern
 import org.apache.spark.sql.redis._
 import org.apache.spark.sql.types.{StructField, _}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Random
 

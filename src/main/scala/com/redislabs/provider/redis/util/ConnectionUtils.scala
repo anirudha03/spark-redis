@@ -8,11 +8,11 @@ import redis.clients.jedis.Jedis
 import redis.clients.jedis.commands.ProtocolCommand
 import redis.clients.jedis.util.SafeEncoder
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
-  * @author The Viet Nguyen
-  */
+ * @author The Viet Nguyen
+ */
 object ConnectionUtils {
 
   def withConnection[A](conn: Jedis)(body: Jedis => A): A = {
@@ -24,7 +24,7 @@ object ConnectionUtils {
   }
 
   def withConnection[A](streamKey: String)(body: Jedis => A)(implicit redisConfig: RedisConfig): A = {
-    withConnection(redisConfig.connectionForKey(streamKey)){
+    withConnection(redisConfig.connectionForKey(streamKey)) {
       body
     }
   }
@@ -36,13 +36,18 @@ object ConnectionUtils {
       val client = jedis.getClient
       val combinedArgs = command +: args
       client.sendCommand(XINFO, combinedArgs: _*)
-      val response = asList(client.getOne).asScala
+      val response: Seq[Any] = asList(client.getOne).asScala.toSeq
       command match {
         case SubCommandStream =>
           asMap(response)
         case SubCommandGroups =>
-          response.map(m => asList(m)).map(_.asScala).map(asMap)
-            .map(m => String.valueOf(m("name")) -> m).toMap
+          response
+            .map(m => asList(m).asScala.toSeq)
+            .map(asMap)
+            .map(m => String.valueOf(m("name")) -> m)
+            .toMap
+        case other =>
+          throw new IllegalArgumentException(s"Unsupported XINFO subcommand: $other")
       }
     }
 

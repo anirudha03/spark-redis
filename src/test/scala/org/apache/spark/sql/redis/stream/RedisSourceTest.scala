@@ -1,11 +1,13 @@
 package org.apache.spark.sql.redis.stream
 
-import org.scalatest.{FunSuite, Matchers, OptionValues}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.OptionValues
 
 /**
-  * @author The Viet Nguyen
-  */
-class RedisSourceTest extends FunSuite with Matchers with OptionValues {
+ * @author The Viet Nguyen
+ */
+class RedisSourceTest extends AnyFunSuite with Matchers with OptionValues {
 
   test("testGetOffsetRanges") {
     val startOffsets = RedisSourceOffset(Map("mystream" -> RedisConsumerOffset("group55", "0-0")))

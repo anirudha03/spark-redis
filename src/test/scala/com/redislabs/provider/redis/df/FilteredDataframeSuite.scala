@@ -2,12 +2,12 @@ package com.redislabs.provider.redis.df
 
 import com.redislabs.provider.redis.util.Person.{TableNamePrefix}
 import org.apache.spark.sql.redis.{RedisFormat, SqlOptionTableName}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import com.redislabs.provider.redis.util.TestUtils._
 
 /**
-  * @author The Viet Nguyen
-  */
+ * @author The Viet Nguyen
+ */
 trait FilteredDataframeSuite extends RedisDataframeSuite with Matchers {
 
   test("select none fields") {

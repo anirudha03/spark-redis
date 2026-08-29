@@ -2,15 +2,16 @@ package com.redislabs.provider.redis.util
 
 import com.redislabs.provider.redis.env.RedisStandaloneEnv
 import com.redislabs.provider.redis.util.ConnectionUtils.{JedisExt, XINFO}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import redis.clients.jedis.StreamEntryID
 
 import scala.collection.JavaConverters._
 
 /**
-  * @author The Viet Nguyen
-  */
-class ConnectionUtilsTest extends FunSuite with Matchers with RedisStandaloneEnv {
+ * @author The Viet Nguyen
+ */
+class ConnectionUtilsTest extends AnyFunSuite with Matchers with RedisStandaloneEnv {
 
   test("xinfo") {
     val streamKey = TestUtils.generateRandomKey()

@@ -6,6 +6,7 @@ import com.redislabs.provider.redis.util.ConnectionUtils.{JedisExt, XINFO, withC
 import com.redislabs.provider.redis.util.StreamUtils.{createConsumerGroupIfNotExist, resetConsumerGroup}
 import com.redislabs.provider.redis.util.{Logging, ParseUtils}
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.classic.{SparkSession => ClassicSparkSession}
 import org.apache.spark.sql.execution.streaming.{Offset, Source}
 import org.apache.spark.sql.redis.stream.RedisSource._
 import org.apache.spark.sql.types.StructType
@@ -13,12 +14,12 @@ import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.unsafe.types.UTF8String
 import redis.clients.jedis.{StreamEntryID, Jedis}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 /**
-  * @author The Viet Nguyen
-  */
+ * @author The Viet Nguyen
+ */
 class RedisSource(sqlContext: SQLContext, metadataPath: String,
                   userDefinedSchema: Option[StructType], parameters: Map[String, String])
   extends Source with Logging {
@@ -34,8 +35,8 @@ class RedisSource(sqlContext: SQLContext, metadataPath: String,
   }
 
   /**
-    * Called once on the source startup. Creates consumer groups and resets their offsets if needed.
-    */
+   * Called once on the source startup. Creates consumer groups and resets their offsets if needed.
+   */
   def start(): Unit = {
     sourceConfig.consumerConfigs.foreach { consumerConfig =>
       val offsetsByStreamKey = sourceConfig.start.map(_.offsets).getOrElse(Map())
@@ -55,9 +56,9 @@ class RedisSource(sqlContext: SQLContext, metadataPath: String,
   override def schema: StructType = currentSchema
 
   /**
-    * Returns the maximum available offset for this source.
-    * Returns `None` if this source has never received any data.
-    */
+   * Returns the maximum available offset for this source.
+   * Returns `None` if this source has never received any data.
+   */
   override def getOffset: Option[Offset] = {
     val initialOffset = RedisSourceOffset(Map())
     val sourceOffset = sourceConfig.consumerConfigs.foldLeft(initialOffset) { case (acc, e) =>
@@ -105,7 +106,8 @@ class RedisSource(sqlContext: SQLContext, metadataPath: String,
           }
         InternalRow(values: _*)
       }
-    sqlContext.internalCreateDataFrame(internalRdd, schema, isStreaming = true)
+    sqlContext.sparkSession.asInstanceOf[ClassicSparkSession]
+      .internalCreateDataFrame(internalRdd, schema, isStreaming = true)
   }
 
   override def commit(end: Offset): Unit = {

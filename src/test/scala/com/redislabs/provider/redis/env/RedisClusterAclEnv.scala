@@ -8,7 +8,7 @@ import org.apache.spark.SparkConf
  */
 trait RedisClusterAclEnv extends Env {
 
-  override val redisPort = 7379
+  override val redisPort = 6379
 
   override val conf: SparkConf = new SparkConf()
     .setMaster("local[*]").setAppName(getClass.getName)
@@ -18,7 +18,7 @@ trait RedisClusterAclEnv extends Env {
     .set("spark.redis.auth", userPassword)
     .set("spark.streaming.stopGracefullyOnShutdown", "true")
     .set("spark.driver.bindAddress", "127.0.0.1")
-
+    .set("spark.driver.host", "127.0.0.1")
   override val redisConfig: RedisConfig =
     new RedisConfig(RedisEndpoint(
       host = redisHost,

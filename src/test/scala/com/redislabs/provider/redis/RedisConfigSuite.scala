@@ -1,12 +1,13 @@
 package com.redislabs.provider.redis
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import redis.clients.jedis.util.JedisClusterCRC16
 
-class RedisConfigSuite extends FunSuite with Matchers {
+class RedisConfigSuite extends AnyFunSuite with Matchers {
 
-  val redisStandaloneConfig = new RedisConfig(RedisEndpoint(host = "127.0.0.1", port = 6379, auth = "passwd"))
-  val redisClusterConfig = new RedisConfig(RedisEndpoint(host = "127.0.0.1", port = 7379))
+  val redisStandaloneConfig = new RedisConfig(RedisEndpoint(host = "127.0.0.1", port = 6379, auth = "Chess1234"))
+  val redisClusterConfig = new RedisConfig(RedisEndpoint(host = "127.0.0.1", port = 6379))
 
   test("getNodesBySlots") {
     redisStandaloneConfig.getNodesBySlots(0, 16383).length shouldBe 1
@@ -24,6 +25,6 @@ class RedisConfigSuite extends FunSuite with Matchers {
 
   test("getNodes") {
     redisStandaloneConfig.getNodes(RedisEndpoint(host = "127.0.0.1", port = 6379, auth = "passwd")).length shouldBe 1
-    redisClusterConfig.getNodes(RedisEndpoint(host = "127.0.0.1", port = 7379)).length shouldBe 7
+    redisClusterConfig.getNodes(RedisEndpoint(host = "127.0.0.1", port = 6379)).length shouldBe 7
   }
 }

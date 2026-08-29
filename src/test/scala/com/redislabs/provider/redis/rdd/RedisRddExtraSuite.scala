@@ -1,10 +1,10 @@
 package com.redislabs.provider.redis.rdd
 
 import com.redislabs.provider.redis.util.ConnectionUtils.withConnection
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import com.redislabs.provider.redis._
 import com.redislabs.provider.redis.util.TestUtils
-import redis.clients.jedis.exceptions.JedisConnectionException
+import redis.clients.jedis.exceptions.JedisAccessControlException
 
 import scala.collection.JavaConverters._
 
@@ -18,63 +18,71 @@ trait RedisRddExtraSuite extends SparkRedisSuite with Keys with Matchers {
   test("toRedisByteLISTs") {
     val list1 = Seq("a1", "b1", "c1")
     val list2 = Seq("a2", "b2", "c2")
+    val listKey1 = TestUtils.generateRandomKey()
+    val listKey2 = TestUtils.generateRandomKey()
     val keyValues = Seq(
-      ("binary-list1", list1),
-      ("binary-list2", list2)
+      (listKey1, list1),
+      (listKey2, list2)
     )
     val keyValueBytes = keyValues.map { case (k, list) => (k.getBytes, list.map(_.getBytes())) }
     val rdd = sc.parallelize(keyValueBytes)
     sc.toRedisByteLISTs(rdd)
 
-    verifyList("binary-list1", list1)
-    verifyList("binary-list2", list2)
+    verifyList(listKey1, list1)
+    verifyList(listKey2, list2)
   }
 
   test("toRedisLISTs") {
     val list1 = Seq("a1", "b1", "c1")
     val list2 = Seq("a2", "b2", "c2")
+    val listKey1 = TestUtils.generateRandomKey()
+    val listKey2 = TestUtils.generateRandomKey()
     val keyValues = Seq(
-      ("list1", list1),
-      ("list2", list2)
+      (listKey1, list1),
+      (listKey2, list2)
     )
     val rdd = sc.parallelize(keyValues)
     sc.toRedisLISTs(rdd)
 
-    verifyList("list1", list1)
-    verifyList("list2", list2)
+    verifyList(listKey1, list1)
+    verifyList(listKey2, list2)
   }
 
   test("toRedisHASHes") {
     val map1 = Map("k1" -> "v1", "k2" -> "v2")
     val map2 = Map("k3" -> "v3", "k4" -> "v4")
+    val hashKey1 = TestUtils.generateRandomKey()
+    val hashKey2 = TestUtils.generateRandomKey()
     val hashes = Seq(
-      ("hash1", map1),
-      ("hash2", map2)
+      (hashKey1, map1),
+      (hashKey2, map2)
     )
     val rdd = sc.parallelize(hashes)
     sc.toRedisHASHes(rdd)
 
-    verifyHash("hash1", map1)
-    verifyHash("hash2", map2)
+    verifyHash(hashKey1, map1)
+    verifyHash(hashKey2, map2)
   }
 
   test("toRedisByteHASHes") {
     val map1 = Map("k1" -> "v1", "k2" -> "v2")
     val map2 = Map("k3" -> "v3", "k4" -> "v4")
+    val hashKey1 = TestUtils.generateRandomKey()
+    val hashKey2 = TestUtils.generateRandomKey()
     val hashes = Seq(
-      ("hash1", map1),
-      ("hash2", map2)
+      (hashKey1, map1),
+      (hashKey2, map2)
     )
     val hashesBytes = hashes.map { case (k, hash) => (k.getBytes, hash.map { case (mapKey, mapVal) => (mapKey.getBytes, mapVal.getBytes) }) }
     val rdd = sc.parallelize(hashesBytes)
     sc.toRedisByteHASHes(rdd)
 
-    verifyHash("hash1", map1)
-    verifyHash("hash2", map2)
+    verifyHash(hashKey1, map1)
+    verifyHash(hashKey2, map2)
   }
 
   test("connection fails with incorrect user/pass") {
-    assertThrows[JedisConnectionException] {
+    assertThrows[JedisAccessControlException] {
       new RedisConfig(RedisEndpoint(
         host = redisHost,
         port = redisPort,

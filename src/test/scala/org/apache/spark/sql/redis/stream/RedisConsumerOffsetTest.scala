@@ -1,11 +1,12 @@
 package org.apache.spark.sql.redis.stream
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 /**
-  * @author The Viet Nguyen
-  */
-class RedisConsumerOffsetTest extends FunSuite with Matchers {
+ * @author The Viet Nguyen
+ */
+class RedisConsumerOffsetTest extends AnyFunSuite with Matchers {
 
   test("testFromJson") {
     val offset = RedisSourceOffset.fromJson(

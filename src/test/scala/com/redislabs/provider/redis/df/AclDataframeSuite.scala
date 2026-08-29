@@ -3,7 +3,7 @@ package com.redislabs.provider.redis.df
 import com.redislabs.provider.redis.util.Person.{TableNamePrefix, data}
 import com.redislabs.provider.redis.util.TestUtils.{generateTableName, interceptSparkErr}
 import org.apache.spark.sql.redis.{RedisFormat, SqlOptionTableName}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import redis.clients.jedis.exceptions.JedisConnectionException
 
 /**

@@ -5,7 +5,6 @@ import redis.clients.jedis.{Jedis, JedisPool, JedisPoolConfig}
 
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import scala.collection.JavaConversions._
 
 
 object ConnectionPool {
@@ -13,20 +12,19 @@ object ConnectionPool {
     new ConcurrentHashMap[RedisEndpoint, JedisPool]()
 
   def connect(re: RedisEndpoint): Jedis = {
-    val pool = pools.getOrElseUpdate(re,
-      {
-        val poolConfig: JedisPoolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(250)
-        poolConfig.setMaxIdle(32)
-        poolConfig.setTestOnBorrow(false)
-        poolConfig.setTestOnReturn(false)
-        poolConfig.setTestWhileIdle(false)
-        poolConfig.setSoftMinEvictableIdleTime(Duration.ofMinutes(1))
-        poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(30))
-        poolConfig.setNumTestsPerEvictionRun(-1)
+    val pool = pools.computeIfAbsent(re, _ => {
+      val poolConfig: JedisPoolConfig = new JedisPoolConfig();
+      poolConfig.setMaxTotal(250)
+      poolConfig.setMaxIdle(32)
+      poolConfig.setTestOnBorrow(false)
+      poolConfig.setTestOnReturn(false)
+      poolConfig.setTestWhileIdle(false)
+      poolConfig.setSoftMinEvictableIdleTime(Duration.ofMinutes(1))
+      poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(30))
+      poolConfig.setNumTestsPerEvictionRun(-1)
 
-        new JedisPool(poolConfig, re.host, re.port, re.timeout, re.user, re.auth, re.dbNum, re.ssl)
-      }
+      new JedisPool(poolConfig, re.host, re.port, re.timeout, re.user, re.auth, re.dbNum, re.ssl)
+    }
     )
     var sleepTime: Int = 4
     var conn: Jedis = null
@@ -46,4 +44,3 @@ object ConnectionPool {
     conn
   }
 }
-

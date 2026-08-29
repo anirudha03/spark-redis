@@ -1,12 +1,13 @@
 package org.apache.spark.sql.redis.stream
 
 import org.apache.spark.sql.redis._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 /**
-  * @author The Viet Nguyen
-  */
-class RedisSourceConfigSuite extends FunSuite with Matchers {
+ * @author The Viet Nguyen
+ */
+class RedisSourceConfigSuite extends AnyFunSuite with Matchers {
 
   val group: String = "group55"
 
@@ -15,18 +16,18 @@ class RedisSourceConfigSuite extends FunSuite with Matchers {
       StreamOptionStreamKeys -> "mystream1,mystream2,mystream3",
       StreamOptionStreamOffsets ->
         s"""
-          |{
-          |  "offsets":{
-          |    "mystream1": {
-          |      "groupName": "$group",
-          |      "offset": "0-10"
-          |    },
-          |    "mystream2": {
-          |       "groupName": "$group",
-          |       "offset": "0-7"
-          |    }
-          |  }
-          |}
+           |{
+           |  "offsets":{
+           |    "mystream1": {
+           |      "groupName": "$group",
+           |      "offset": "0-10"
+           |    },
+           |    "mystream2": {
+           |       "groupName": "$group",
+           |       "offset": "0-7"
+           |    }
+           |  }
+           |}
         """.stripMargin,
       StreamOptionParallelism -> "2",
       StreamOptionGroupName -> group,
