@@ -33,8 +33,8 @@ object ConnectionPool {
         conn = pool.getResource
       }
       catch {
-        case e: JedisConnectionException if e.getCause.toString.
-          contains("ERR max number of clients reached") => {
+        case e: JedisConnectionException if Option(e.getCause).exists(_.toString.
+          contains("ERR max number of clients reached")) => {
           if (sleepTime < 500) sleepTime *= 2
           Thread.sleep(sleepTime)
         }
