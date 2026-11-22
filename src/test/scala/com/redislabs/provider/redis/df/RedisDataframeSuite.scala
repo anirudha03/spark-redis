@@ -5,11 +5,11 @@ import com.redislabs.provider.redis.util.Person
 import com.redislabs.provider.redis.util.Person.data
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.redis.{RedisFormat, SqlOptionTableName}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 /**
-  * @author The Viet Nguyen
-  */
+ * @author The Viet Nguyen
+ */
 trait RedisDataframeSuite extends SparkRedisSuite with Matchers {
 
   import TestSqlImplicits._

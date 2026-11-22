@@ -1,12 +1,13 @@
 package com.redislabs.provider.redis
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Unit tests for RedisClientLibraryInfo object.
   * These tests validate the library identification information used by CLIENT SETINFO.
   */
-class RedisClientLibraryInfoTest extends FunSuite with Matchers {
+class RedisClientLibraryInfoTest extends AnyFunSuite with Matchers {
 
   test("sparkRedisVersion should return a non-null value") {
     RedisClientLibraryInfo.sparkRedisVersion should not be null

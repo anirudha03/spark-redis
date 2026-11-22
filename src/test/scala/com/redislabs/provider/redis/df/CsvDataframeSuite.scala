@@ -3,7 +3,7 @@ package com.redislabs.provider.redis.df
 import com.redislabs.provider.redis.util.TestUtils._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.redis.{RedisFormat, SqlOptionKeyColumn, SqlOptionTableName}
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 trait CsvDataframeSuite extends RedisDataframeSuite with Matchers {
 

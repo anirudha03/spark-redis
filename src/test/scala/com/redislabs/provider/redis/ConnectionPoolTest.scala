@@ -1,13 +1,14 @@
 package com.redislabs.provider.redis
 
 import com.redislabs.provider.redis.env.RedisStandaloneEnv
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Integration tests for ConnectionPool, specifically testing CLIENT SETINFO functionality.
   * Requires a running Redis server (provided by RedisStandaloneEnv).
   */
-class ConnectionPoolTest extends FunSuite with Matchers with RedisStandaloneEnv {
+class ConnectionPoolTest extends AnyFunSuite with Matchers with RedisStandaloneEnv {
 
   /**
     * Cancels the test on servers older than Redis 7.2, which introduced the lib-name / lib-ver

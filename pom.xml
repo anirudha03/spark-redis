@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.redislabs</groupId>
-	<artifactId>spark-redis_2.12</artifactId>
-	<version>3.1.0-SNAPSHOT</version>
+	<artifactId>spark-redis_2.13</artifactId>
+	<version>4.0.0-SNAPSHOT</version>
 	<name>Spark-Redis</name>
 	<description>A Spark library for Redis</description>
 	<url>http://github.com/RedisLabs/spark-redis</url>
@@ -42,12 +42,15 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-		<scala.major.version>2.12</scala.major.version>
-		<scala.complete.version>${scala.major.version}.0</scala.complete.version>
-		<jedis.version>3.9.0</jedis.version>
-		<spark.version>3.2.1</spark.version>
-		<plugins.scalatest.version>1.0</plugins.scalatest.version>
+		<java.version>17</java.version>
+		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<scala.major.version>2.13</scala.major.version>
+		<scala.complete.version>2.13.16</scala.complete.version>
+		<jedis.version>5.2.0</jedis.version>
+		<spark.version>4.0.1</spark.version>
+		<plugins.scalatest.version>2.2.0</plugins.scalatest.version>
 	</properties>
 
 	<distributionManagement>
@@ -66,7 +69,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
+				<version>0.8.12</version>
 				<executions>
 					<execution>
 						<goals>
@@ -85,15 +88,9 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.4.6</version>
+				<version>4.9.2</version>
 				<configuration>
 					<scalaVersion>${scala.complete.version}</scalaVersion>
-					<javacArgs>
-						<javacArg>-source</javacArg>
-						<javacArg>${java.version}</javacArg>
-						<javacArg>-target</javacArg>
-						<javacArg>${java.version}</javacArg>
-					</javacArgs>
 				</configuration>
 				<executions>
 					<execution>
@@ -121,7 +118,7 @@
 			<plugin>
 				<groupId>org.scalastyle</groupId>
 				<artifactId>scalastyle-maven-plugin</artifactId>
-				<version>0.7.0</version>
+				<version>1.0.0</version>
 				<configuration>
 					<verbose>false</verbose>
 					<failOnWarning>false</failOnWarning>
@@ -145,7 +142,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.4.1</version>
 				<configuration>
 					<skipIfEmpty>true</skipIfEmpty>
 				</configuration>
@@ -153,7 +150,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.5.4</version>
+				<version>3.7.1</version>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -171,7 +168,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.10</version>
+				<version>3.6.0</version>
 				<executions>
 					<execution>
 						<id>add-scala-sources</id>
@@ -227,7 +224,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.18.1</version>
+				<version>3.2.5</version>
 				<configuration>
 					<skipTests>true</skipTests>
 				</configuration>
@@ -241,7 +238,7 @@
 					<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
 					<junitxml>.</junitxml>
 					<filereports>WDF TestSuite.txt</filereports>
-					<argLine>-XX:MaxPermSize=256m -Xmx2g -Djavax.net.ssl.trustStorePassword=password -Djavax.net.ssl.trustStore=./src/test/resources/tls/clientkeystore -Djavax.net.ssl.trustStoreType=jceks</argLine>
+					<argLine>-Xmx2g -Djavax.net.ssl.trustStorePassword=password -Djavax.net.ssl.trustStore=./src/test/resources/tls/clientkeystore -Djavax.net.ssl.trustStoreType=jceks --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/sun.util.calendar=ALL-UNNAMED --add-opens=java.base/sun.security.action=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED</argLine>
 					<tagsToExclude>com.redislabs.provider.redis.util.BenchmarkTest</tagsToExclude>
 				</configuration>
 				<executions>
@@ -313,7 +310,7 @@
 		<dependency>
 			<groupId>org.scalatest</groupId>
 			<artifactId>scalatest_${scala.major.version}</artifactId>
-			<version>3.0.8</version>
+			<version>3.2.19</version>
 			<scope>test</scope>
 		</dependency>
     </dependencies>

@@ -1,7 +1,7 @@
 package com.redislabs.provider.redis.rdd
 
 import com.redislabs.provider.redis.ReadWriteConfig
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import redis.clients.jedis.util.JedisClusterCRC16
 
 import scala.collection.JavaConverters._
@@ -30,8 +30,8 @@ trait RedisKeysSuite extends RedisRddSuite with Keys with Matchers {
     val allkeys = getKeys(redisConfig.hosts, 0, 16383, "*")
     val nodeKeysPairs = groupKeysByNode(redisConfig.hosts, allkeys)
     val returnedCnt = nodeKeysPairs.map { x =>
-      filterKeysByType(x._1.connect(), x._2, "string").length
-    }
+        filterKeysByType(x._1.connect(), x._2, "string").length
+      }
       .sum
     val targetCnt = sc.parallelize(content.split("\\W+").filter(!_.isEmpty)).distinct.count
     assert(returnedCnt == targetCnt)

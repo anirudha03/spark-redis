@@ -11,16 +11,18 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.redis._
 import org.apache.spark.sql.streaming.StreamingQuery
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import redis.clients.jedis.StreamEntryID
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.DurationLong
+import scala.language.postfixOps
 
 /**
   * @author The Viet Nguyen
   */
-trait RedisStreamSourceSuite extends FunSuite with Matchers with Env with Logging {
+trait RedisStreamSourceSuite extends AnyFunSuite with Matchers with Env with Logging {
 
   val AutoEntryId: StreamEntryID = new StreamEntryID() {
     override def toString: String = "*"

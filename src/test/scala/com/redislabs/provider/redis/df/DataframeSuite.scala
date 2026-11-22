@@ -5,7 +5,7 @@ import com.redislabs.provider.redis.util.Person._
 import com.redislabs.provider.redis.util.TestUtils._
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.redis._
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 
 
 trait DataframeSuite extends RedisDataframeSuite with Matchers {

@@ -1,6 +1,5 @@
 package com.redislabs.provider.redis.streaming
 
-import java.util.AbstractMap.SimpleEntry
 import com.redislabs.provider.redis.util.PipelineUtils.foreachWithPipeline
 import com.redislabs.provider.redis.util.{Logging, StreamUtils}
 import com.redislabs.provider.redis.{ReadWriteConfig, RedisConfig}
@@ -8,13 +7,15 @@ import org.apache.curator.utils.ThreadUtils
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.receiver.Receiver
 import org.sparkproject.guava.util.concurrent.RateLimiter
-import redis.clients.jedis.{Jedis, StreamEntry, StreamEntryID}
+import redis.clients.jedis.{Jedis, StreamEntryID}
+import redis.clients.jedis.resps.StreamEntry
+import redis.clients.jedis.params.XReadGroupParams
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 /**
-  * Receives messages from Redis Stream
-  */
+ * Receives messages from Redis Stream
+ */
 class RedisStreamReceiver(consumersConfig: Seq[ConsumerConfig],
                           redisConfig: RedisConfig,
                           readWriteConfig: ReadWriteConfig,
@@ -42,12 +43,16 @@ class RedisStreamReceiver(consumersConfig: Seq[ConsumerConfig],
                                redisConfig: RedisConfig,
                                implicit val readWriteConfig: ReadWriteConfig) extends Runnable {
 
-    val jedis: Jedis = redisConfig.connectionForKey(conf.streamKey)
+    var jedis: Jedis = _
     val rateLimiterOpt: Option[RateLimiter] = conf.rateLimitPerConsumer.map(r => RateLimiter.create(r))
+
+    private val readParams: XReadGroupParams =
+      new XReadGroupParams().count(conf.batchSize).block(conf.block.toInt)
 
     override def run(): Unit = {
       logInfo(s"Starting MessageHandler $conf")
       try {
+        jedis = redisConfig.connectionForKey(conf.streamKey)
         createConsumerGroupIfNotExist()
         receiveUnacknowledged()
         receiveNewMessages()
@@ -69,43 +74,45 @@ class RedisStreamReceiver(consumersConfig: Seq[ConsumerConfig],
     def receiveUnacknowledged(): Unit = {
       logInfo(s"Starting receiving unacknowledged messages for key ${conf.streamKey}")
       var continue = true
-      val unackId = new SimpleEntry(conf.streamKey, new StreamEntryID(0, 0))
+      val unackStreams: java.util.Map[String, StreamEntryID] =
+        Map(conf.streamKey -> new StreamEntryID(0, 0)).asJava
 
       while (!isStopped && continue) {
         val response = jedis.xreadGroup(
           conf.groupName,
           conf.consumerName,
-          conf.batchSize,
-          conf.block,
-          false,
-          unackId)
+          readParams,
+          unackStreams)
 
-        val unackMessagesMap = response.map(e => (e.getKey, e.getValue)).toMap
-        val entries = unackMessagesMap(conf.streamKey)
-        if (entries.isEmpty) {
+        if (response != null) {
+          val unackMessagesMap = response.asScala.map(e => (e.getKey, e.getValue.asScala.toSeq)).toMap
+          val entries = unackMessagesMap.getOrElse(conf.streamKey, Seq.empty)
+          if (entries.isEmpty) {
+            continue = false
+          }
+          storeAndAck(conf.streamKey, entries)
+        } else {
           continue = false
         }
-        storeAndAck(conf.streamKey, entries)
       }
     }
 
     def receiveNewMessages(): Unit = {
       logInfo(s"Starting receiving new messages for key ${conf.streamKey}")
-      val newMessId = new SimpleEntry(conf.streamKey, StreamEntryID.UNRECEIVED_ENTRY)
+      val newMessStreams: java.util.Map[String, StreamEntryID] =
+        Map(conf.streamKey -> StreamEntryID.UNRECEIVED_ENTRY).asJava
 
       while (!isStopped) {
         val response = jedis.xreadGroup(
           conf.groupName,
           conf.consumerName,
-          conf.batchSize,
-          conf.block,
-          false,
-          newMessId)
+          readParams,
+          newMessStreams)
 
         if (response != null) {
-          for (streamMessages <- response) {
+          for (streamMessages <- response.asScala) {
             val key = streamMessages.getKey
-            val entries = streamMessages.getValue
+            val entries = streamMessages.getValue.asScala.toSeq
             storeAndAck(key, entries)
           }
         }
@@ -129,7 +136,7 @@ class RedisStreamReceiver(consumersConfig: Seq[ConsumerConfig],
     def entriesToItems(key: String, entries: Seq[StreamEntry]): Seq[StreamItem] = {
       entries.map { e =>
         val itemId = ItemId(e.getID.getTime, e.getID.getSequence)
-        StreamItem(key, itemId, e.getFields.toMap)
+        StreamItem(key, itemId, e.getFields.asScala.toMap)
       }
     }
   }
@@ -137,14 +144,14 @@ class RedisStreamReceiver(consumersConfig: Seq[ConsumerConfig],
 }
 
 /**
-  * @param streamKey            redis stream key
-  * @param groupName            consumer group name
-  * @param consumerName         consumer name
-  * @param offset               stream offset
-  * @param rateLimitPerConsumer maximum retrieved messages per second per single consumer
-  * @param batchSize            maximum number of pulled items in a read API call
-  * @param block                time in milliseconds to wait for data in a blocking read API call
-  */
+ * @param streamKey            redis stream key
+ * @param groupName            consumer group name
+ * @param consumerName         consumer name
+ * @param offset               stream offset
+ * @param rateLimitPerConsumer maximum retrieved messages per second per single consumer
+ * @param batchSize            maximum number of pulled items in a read API call
+ * @param block                time in milliseconds to wait for data in a blocking read API call
+ */
 case class ConsumerConfig(streamKey: String,
                           groupName: String,
                           consumerName: String,
@@ -154,42 +161,41 @@ case class ConsumerConfig(streamKey: String,
                           block: Long = 500)
 
 /**
-  * Represents an offset in the stream
-  */
+ * Represents an offset in the stream
+ */
 sealed trait Offset
 
 /**
-  * Latest offset, known as a '$' special id
-  */
+ * Latest offset, known as a '$' special id
+ */
 case object Latest extends Offset
 
 /**
-  * Earliest offset, '0-0' id
-  */
+ * Earliest offset, '0-0' id
+ */
 case object Earliest extends Offset
 
 /**
-  * Specific id in the form of 'v1-v2'
-  *
-  * @param v1 first token of the id
-  * @param v2 second token of the id
-  */
+ * Specific id in the form of 'v1-v2'
+ *
+ * @param v1 first token of the id
+ * @param v2 second token of the id
+ */
 case class IdOffset(v1: Long, v2: Long) extends Offset
 
 /**
-  * Item id in the form of 'v1-v2'
-  *
-  * @param v1 first token of the id
-  * @param v2 second token of the id
-  */
+ * Item id in the form of 'v1-v2'
+ *
+ * @param v1 first token of the id
+ * @param v2 second token of the id
+ */
 case class ItemId(v1: Long, v2: Long)
 
 /**
-  * Represent an item in the stream
-  *
-  * @param streamKey stream key
-  * @param id        item(entry) id
-  * @param fields    key/value map of item fields
-  */
+ * Represent an item in the stream
+ *
+ * @param streamKey stream key
+ * @param id        item(entry) id
+ * @param fields    key/value map of item fields
+ */
 case class StreamItem(streamKey: String, id: ItemId, fields: Map[String, String])
-
